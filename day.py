@@ -97,6 +97,7 @@ def day(count) -> bool:
                 print(f"Players who voted against lynching {votedPlayer.getName()}:\n{', '.join(playerAgainst)}\n")
                 print(f"Players who abstained from voting:\n{', '.join(playerAbstain)}\n")
                 votedPlayer.kill()
+                time.sleep(5)
                 return False
             else:
                 print(f"{votedPlayer.getName()} was not lynched.")
