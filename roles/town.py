@@ -25,7 +25,7 @@ class Town(Role):
         turnEnded: bool = True
         while turnEnded:
             questions = [inquirer.List("EndTurn", 
-                message="Press the correct one to end your turn:", 
+                message="Press the correct one to end your turn", 
                 choices=["Not this one.", "Not this one.", "This one.", "Not this one."])]
             answers = inquirer.prompt(questions)
             if answers["EndTurn"] == "This one.":

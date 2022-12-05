@@ -55,7 +55,7 @@ def day(count) -> bool:
         if answers["Vote"] == "Yes":
             os.system("cls")
             questions = [inquirer.List("VoteFor", 
-                message="Select a person to stand trial:", 
+                message="Select a person to stand trial", 
                 choices=alivePlayerNames)]
             answers = inquirer.prompt(questions)
             votedPlayer: p = p.getPlayerByName(answers["VoteFor"])
@@ -71,7 +71,7 @@ def day(count) -> bool:
                     print(f"{player.getName()}'s Turn:")
                     player.passwordCheck()
                     questions = [inquirer.List("PlayerVote", 
-                        message="Cast your vote:", 
+                        message="Cast your vote", 
                         choices=["For", "Against", "Abstain"])]
                     answers = inquirer.prompt(questions)
                     if answers["PlayerVote"] == "For":
@@ -99,7 +99,7 @@ def day(count) -> bool:
                 votedPlayer.kill()
                 return False
             else:
-                print(f"{votedPlayer.getName()}was not lynched.")
+                print(f"{votedPlayer.getName()} was not lynched.")
                 print("Day has ended.")
                 time.sleep(5)
         elif answers["Vote"] == "No":

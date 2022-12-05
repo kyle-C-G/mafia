@@ -38,7 +38,7 @@ class Mafia(Role):
                 playerList.append(player.getName())
         if len(playerList) > 0: 
             questions = [inquirer.List("MafiaVote", 
-                message="Vote for the Mafia to kill:", 
+                message="Vote for the Mafia to kill", 
                 choices=playerList)]
             answers = inquirer.prompt(questions)
             votedPlayer = playerClass.getPlayerByName(answers["MafiaVote"])

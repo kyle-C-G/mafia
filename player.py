@@ -1,10 +1,10 @@
-from mafia import Mafia
-from town import Town
-from doc import Doctor
-from invest import Investigator
-from godfather import Godfather
+from roles.mafia import Mafia
+from roles.town import Town
+from roles.doc import Doctor
+from roles.invest import Investigator
+from roles.godfather import Godfather
 
-class Player(Mafia, Town, Doctor, Investigator, Godfather):
+class Player():
 
     playerCount: int = 0
     alivePlayers: int = 0
@@ -47,6 +47,15 @@ class Player(Mafia, Town, Doctor, Investigator, Godfather):
                 self.role: Investigator = Investigator()
             case _:
                 print("Error")
+
+    def voteFor(self, player) -> None:
+        self.role.voteFor(player=player)
+
+    def voteAgainst(self) -> None:
+        self.role.voteAgainst()
+    
+    def voteAbstain(self) -> None:
+        self.role.voteAbstain()
 
     def nightReset(self) -> None:
         self.mafiaVotes = 0

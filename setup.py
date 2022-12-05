@@ -13,7 +13,7 @@ def addPlayer(count) -> None:
     # options: list[str] = ["town", "mafia", "doctor", "investigator", "godfather"]
     questions = [ 
         inquirer.List("Role", 
-            message="Pick a Role:", 
+            message="Pick a Role", 
             choices=["Mafia", "Godfather", "Town", "Doctor", "Investigator"])]
     while nameVerification:
         name: str = input("Enter your name:\n")
