@@ -18,3 +18,15 @@ class Role(ABC):
     @abstractmethod
     def nightAction(self) -> None:
         pass
+
+    @abstractmethod
+    def voteAbstain(self) -> None:
+        pass
+
+    @abstractmethod
+    def voteAgainst(self) -> None:
+        pass
+
+    @abstractmethod
+    def killPlayer(self) -> None:
+        pass
