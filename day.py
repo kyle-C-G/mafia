@@ -44,6 +44,7 @@ def day(count) -> bool:
     else:
         if count == 1:
             print(f"Players: {', '.join(alivePlayerNames)}.")
+            time.sleep(5)
         elif count > 1:
             print(f"Players still alive:\n{', '.join(alivePlayerNames)}.")
         print(f"Time remaining: 2 mins.")
