@@ -30,3 +30,7 @@ class Role(ABC):
     @abstractmethod
     def killPlayer(self) -> None:
         pass
+
+    @abstractmethod
+    def nightPrompt(self) -> None:
+        pass

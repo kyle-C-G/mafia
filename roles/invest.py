@@ -34,7 +34,7 @@ class Investigator(Role):
             case "Town":
                 print(f"{player.getName()} is a member of the Town.")
     
-    def nightAction(self, playerClass) -> None:
+    def nightPrompt(self, playerClass) -> None:
         questions = [inquirer.List("Invest", 
             message="Choose someone to investigate", 
             choices=playerClass.alivePlayerNames)]
@@ -42,3 +42,6 @@ class Investigator(Role):
         player = playerClass.getPlayerByName(answers["Invest"])
         self.investigate(player=player)
         time.sleep(5)
+
+    def nightAction(self) -> None:
+        return

@@ -21,7 +21,7 @@ class Town(Role):
         self.previousVote = "Against"
         return
     
-    def nightAction(self, playerClass) -> None:
+    def nightPrompt(self, playerClass) -> None:
         turnEnded: bool = True
         while turnEnded:
             questions = [inquirer.List("EndTurn", 
@@ -33,3 +33,6 @@ class Town(Role):
             else:
                 pass
         time.sleep(5)
+
+    def nightAction(self) -> None:
+        return

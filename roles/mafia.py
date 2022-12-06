@@ -29,7 +29,7 @@ class Mafia(Role):
         self.previousVote = "Against"
         return
     
-    def nightAction(self, playerClass) -> list[str]:
+    def nightPrompt(self, playerClass) -> list[str]:
         playerList: list[str] = []
         for player in playerClass.alivePlayerList:
             if player.getRoleName() == "Mafia":
@@ -46,3 +46,6 @@ class Mafia(Role):
         else:
             print("Error")
         time.sleep(5)
+
+    def nightAction(self) -> None:
+        return

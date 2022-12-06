@@ -28,12 +28,18 @@ class Doctor(Role):
         print(f"{player.getName()} is protected.")
         return
 
-    def nightAction(self, playerClass) -> list[str]:
+    def nightPrompt(self, playerClass) -> list[str]:
         questions = [inquirer.List("Heal", 
             message="Choose who to heal", 
             choices=playerClass.alivePlayerNames)]
         answers = inquirer.prompt(questions)
         player = playerClass.getPlayerByName(answers["Heal"])
-        player.addProtection()
+        if player == self:
+            self.selfHeal()
+        else:
+            player.doctotHeal()
         print(f"Protecting {player.getName()}")
         time.sleep(5)
+
+    def nightAction(self) -> None:
+        return

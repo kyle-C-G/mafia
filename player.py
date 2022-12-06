@@ -11,10 +11,22 @@ class Player():
     playerList: list = []
     alivePlayerList: list = []
     alivePlayerNames: list = []
+    playerId: int = 1
+    previousAlivePlayers: list = []
+
+    def setPreviousAlivePlayers() -> None:
+        Player.previousAlivePlayes = Player.alivePlayerList
 
     def getPlayerByName(name: str):
         for player in Player.playerList:
             if player.getName() == name:
+                return player
+            else:
+                pass
+
+    def getPlayerbyId(id: int):
+        for player in Player.playerList:
+            if player.getId() == id:
                 return player
             else:
                 pass
@@ -24,6 +36,8 @@ class Player():
         Player.alivePlayers += 1
         Player.alivePlayerList.append(self)
         Player.playerList.append(self)
+        self.playerId = Player.playerId
+        Player.playerId += 1
         self.mafiaVotes: int = 0
         self.name: str = name
         Player.alivePlayerNames.append(self.name) 
@@ -32,6 +46,9 @@ class Player():
         self.password: str = password
         self.protected: bool = False
         self.previousVote: str = ""
+        self.mafiaVoted: bool = False
+        self.selfProtection: bool = False
+        self.doctorVote: bool = False
         print(role)
         match role:
             case "Mafia":
@@ -48,6 +65,15 @@ class Player():
             case _:
                 print("Error")
 
+    def selfHeal(self) -> None:
+        self.selfProtection = True
+
+    def getId(self) -> int:
+        return self.playerId
+
+    def doctorHeal(self) -> None:
+        self.doctorVote = True
+
     def voteFor(self, player) -> None:
         self.role.voteFor(player=player)
 
@@ -62,6 +88,9 @@ class Player():
         self.protected = False
         self.previousVote = ""
         self.lynchVotes = 0
+        self.mafiaVoted = False
+        self.doctorVote = False
+        self.selfProtection = False
 
     def mafiaVote(self) -> None:
         self.mafiaVotes += 1
@@ -106,17 +135,16 @@ class Player():
     def resetProtection(self) -> None:
         self.protected = False
     
-    def kill(self) -> bool:
-        if self.protected:
-            return False
+    def kill(self) -> None:
+        if self.selfProtection:
+            return
         else:
             self.dead = True
-            print(f"{self.getName()} was killed.")
             Player.playerCount -= 1
             Player.alivePlayers -= 1
             Player.alivePlayerList.remove(self)
             Player.alivePlayerNames.remove(self.name)
-            return True
+            return
     
     def isDead(self) -> bool:
         return self.dead

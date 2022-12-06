@@ -78,17 +78,17 @@ def startVote(alivePlayerNames, alivePlayers) -> None:
         time.sleep(5)
 
  
-def day(count) -> bool:
+def day(dayCount: int) -> bool:
     players: list[p] = p.playerList
     playerCont: int = p.playerCount
     alivePlayers: list[p] = p.alivePlayerList
     alivePlayerNames: list[str] = p.alivePlayerNames
     os.system("cls")
-    print(f"Day {count}")
-    if count == 1:
+    print(f"Day {dayCount}")
+    if dayCount == 1:
         print(f"Players: {', '.join(alivePlayerNames)}.")
         time.sleep(5)
-    elif count > 1:
+    elif dayCount > 1:
         print(f"Players still alive:\n{', '.join(alivePlayerNames)}.")
         wonStatus = checkWon()
         if wonStatus == "Mafia Won.":
