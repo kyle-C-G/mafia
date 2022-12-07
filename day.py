@@ -49,11 +49,11 @@ def startVote(alivePlayerNames, alivePlayers) -> None:
                 choices=["For", "Against", "Abstain"])]
             answers = inquirer.prompt(questions)
             if answers["PlayerVote"] == "For":
-                player.voteFor(votedPlayer)
+                player.voteFor(player = votedPlayer)
             elif answers["PlayerVote"] == "Abstain":
-                player.voteAbstain()
+                player.voteAbstain(player = votedPlayer)
             elif answers["PlayerVote"] == "Against":
-                player.voteAgainst()
+                player.voteAgainst(player=votedPlayer)
     os.system("cls")
     if votedPlayer.getVoteCount() > ((len(alivePlayers) / 2) - 1):
         playerFor = []

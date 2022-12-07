@@ -50,16 +50,15 @@ class Player():
         print(role)
         match role:
             case "Mafia":
-                self.role: Mafia = Mafia()
-                self.mafia: Mafia = Mafia
+                self.role: Mafia = Mafia(name = self.name)
             case "Town":
-                self.role: Town = Town()
+                self.role: Town = Town( name = self.name)
             case "Godfather":
-                self.role: Godfather = Godfather()
+                self.role: Godfather = Godfather(name = self.name)
             case "Doctor":
-                self.role: Doctor = Doctor()
+                self.role: Doctor = Doctor(name = self.name)
             case "Investigator":
-                self.role: Investigator = Investigator()
+                self.role: Investigator = Investigator(name = self.name)
             case _:
                 print("Error")
 
@@ -79,11 +78,11 @@ class Player():
     def voteFor(self, player) -> None:
         self.role.voteFor(player=player)
 
-    def voteAgainst(self) -> None:
-        self.role.voteAgainst()
+    def voteAgainst(self, player) -> None:
+        self.role.voteAgainst(player = player)
     
-    def voteAbstain(self) -> None:
-        self.role.voteAbstain()
+    def voteAbstain(self, player) -> None:
+        self.role.voteAbstain(player = player)
 
     def nightReset(self) -> None:
         self.role.nightReset()

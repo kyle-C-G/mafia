@@ -3,10 +3,11 @@ import inquirer
 import time
 
 class Town(Role):
-    def __init__(self) -> None:
+    def __init__(self, name: str) -> None:
         super().__init__(roleName="Town")
         self.protection = False
         self.previousVote = ""
+        self.name = name
 
     def killPlayer(self, player) -> None:
         print("You can't kill.")
@@ -15,11 +16,11 @@ class Town(Role):
         player.lynchVotes += 1
         return
     
-    def voteAbstain(self) -> None:
+    def voteAbstain(self, player) -> None:
         self.previousVote = "Abstain"
         return
 
-    def voteAgainst(self) -> None:
+    def voteAgainst(self, player) -> None:
         self.previousVote = "Against"
         return
     

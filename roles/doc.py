@@ -3,12 +3,13 @@ import inquirer
 import time
 
 class Doctor(Role):
-    def __init__(self) -> None:
+    def __init__(self, name: str) -> None:
         super().__init__(roleName="Doctor")
         self.selfProtection: bool = False
-        self.protection = False
+        self.protection: bool = False
         self.healedPlayer = 0
-        self.previousVote = ""
+        self.previousVote: str = ""
+        self.name = name
 
     def killPlayer(self, player) -> None:
         print("You can't kill.")
@@ -19,7 +20,7 @@ class Doctor(Role):
         self.previousVote = "For"
         return
 
-    def voteAbstain(self) -> None:
+    def voteAbstain(self, player) -> None:
         self.previousVote = "Abstain"
         return
 
@@ -40,7 +41,8 @@ class Doctor(Role):
             choices=playerclass.alivePlayerNames)]
         answers = inquirer.prompt(questions)
         player = playerclass.getPlayerByName(answers["Heal"])
-        if player == self:
+        ownPlayer = playerclass.getPlayerByName(self.name)
+        if player == ownPlayer:
             self.selfHeal()
         else:
             self.healedPlayer = player
@@ -71,6 +73,8 @@ class Doctor(Role):
             return False
         else:
             self.dead = True
+            print("Did not heal")
+            time.sleep(5)
             return True
     
     def nightReset(self) -> None:
