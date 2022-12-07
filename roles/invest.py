@@ -5,6 +5,8 @@ import time
 class Investigator(Role):
     def __init__(self) -> None:
         super().__init__(roleName="Investigator")
+        self.protection = False
+        self.previousVote = ""
 
     def killPlayer(self, player) -> None:
         print("You can't kill.")
@@ -34,14 +36,26 @@ class Investigator(Role):
             case "Town":
                 print(f"{player.getName()} is a member of the Town.")
     
-    def nightPrompt(self, playerClass) -> None:
+    def nightPrompt(self, playerclass) -> None:
         questions = [inquirer.List("Invest", 
-            message="Choose someone to investigate", 
-            choices=playerClass.alivePlayerNames)]
+            message = "Choose someone to investigate", 
+            choices = playerclass.alivePlayerNames)]
         answers = inquirer.prompt(questions)
-        player = playerClass.getPlayerByName(answers["Invest"])
+        player = playerclass.getPlayerByName(answers["Invest"])
         self.investigate(player=player)
-        time.sleep(5)
+        time.sleep(2)
 
-    def nightAction(self) -> None:
+    def nightAction(self, playerclass) -> None:
+        return
+
+    def kill(self) -> bool:
+        if self.protection:
+            return False
+        else:
+            self.dead = True
+            return True
+    
+    def nightReset(self) -> None:
+        self.protected = False
+        self.previousVote = ""
         return

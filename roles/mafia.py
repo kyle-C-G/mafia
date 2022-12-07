@@ -9,6 +9,8 @@ class Mafia(Role):
     def __init__(self) -> None:
         super().__init__(roleName="Mafia")
         Mafia.mafiaMembers.append(self)
+        self.protection = False
+        self.previousVote = ""
 
     def killPlayer(self, player) -> None:
         if player.getRoleName() == "Mafia":
@@ -29,9 +31,10 @@ class Mafia(Role):
         self.previousVote = "Against"
         return
     
-    def nightPrompt(self, playerClass) -> list[str]:
+    def nightPrompt(self, playerclass) -> list[str]:
         playerList: list[str] = []
-        for player in playerClass.alivePlayerList:
+        alivePlayerList = playerclass.alivePlayerList
+        for player in alivePlayerList:
             if player.getRoleName() == "Mafia":
                 pass
             else:
@@ -41,11 +44,29 @@ class Mafia(Role):
                 message="Vote for the Mafia to kill", 
                 choices=playerList)]
             answers = inquirer.prompt(questions)
-            votedPlayer = playerClass.getPlayerByName(answers["MafiaVote"])
+            votedPlayer = playerclass.getPlayerByName(answers["MafiaVote"])
             votedPlayer.mafiaVote()
         else:
             print("Error")
-        time.sleep(5)
+        time.sleep(2)
 
-    def nightAction(self) -> None:
+    def nightAction(self, playerclass) -> None:
+        highestVotedPlayer = {"votes": 0, "player": 0}
+        alivePlayerList = playerclass.alivePlayerList
+        for player in alivePlayerList:
+            if player.getMafiaVoteCount() > highestVotedPlayer["votes"]:
+                highestVotedPlayer["player"] = player
+        votedPlayer = highestVotedPlayer["player"]
+        votedPlayer.kill()
+
+    def kill(self) -> bool:
+        if self.protection:
+            return False
+        else:
+            self.dead = True
+            return True
+
+    def nightReset(self) -> None:
+        self.protected = False
+        self.previousVote = ""
         return

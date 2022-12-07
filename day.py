@@ -66,16 +66,16 @@ def startVote(alivePlayerNames, alivePlayers) -> None:
                 playerFor.append(player.getName())
             elif player.getPreviousVote() == "Against": 
                 playerAgainst.append(player.getName())
-        time.sleep(5)
+        time.sleep(2)
         print(f"Players who voted for lynching {votedPlayer.getName()}:\n{', '.join(playerFor)}\n")
         print(f"Players who voted against lynching {votedPlayer.getName()}:\n{', '.join(playerAgainst)}\n")
         print(f"Players who abstained from voting:\n{', '.join(playerAbstain)}\n")
         votedPlayer.kill()
-        time.sleep(5)
+        time.sleep(2)
     else:
         print(f"{votedPlayer.getName()} was not lynched.")
         print("Day has ended.")
-        time.sleep(5)
+        time.sleep(2)
 
  
 def day(dayCount: int) -> bool:
@@ -87,7 +87,8 @@ def day(dayCount: int) -> bool:
     print(f"Day {dayCount}")
     if dayCount == 1:
         print(f"Players: {', '.join(alivePlayerNames)}.")
-        time.sleep(5)
+        time.sleep(2)
+        return False
     elif dayCount > 1:
         print(f"Players still alive:\n{', '.join(alivePlayerNames)}.")
         wonStatus = checkWon()
@@ -108,7 +109,7 @@ def day(dayCount: int) -> bool:
                     return False
             elif answers["Vote"] == "No":
                 print("Day has ended.")
-                time.sleep(5)
+                time.sleep(2)
             gameWon: bool = checkWon()
             if gameWon == "Mafia Won.":
                 print("Mafia have won the game.")

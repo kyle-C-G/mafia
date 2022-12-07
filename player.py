@@ -45,9 +45,7 @@ class Player():
         self.lynchVotes: int = 0
         self.password: str = password
         self.protected: bool = False
-        self.previousVote: str = ""
         self.mafiaVoted: bool = False
-        self.selfProtection: bool = False
         self.doctorVote: bool = False
         print(role)
         match role:
@@ -65,14 +63,18 @@ class Player():
             case _:
                 print("Error")
 
-    def selfHeal(self) -> None:
-        self.selfProtection = True
+    def nightPrompt(self, playerclass) -> None:
+        self.role.nightPrompt(playerclass=playerclass)
+        return
+
+    def isMafiaVoted(self) -> bool:
+        if self.mafiaVoted:
+            return True
+        else:
+            return False
 
     def getId(self) -> int:
         return self.playerId
-
-    def doctorHeal(self) -> None:
-        self.doctorVote = True
 
     def voteFor(self, player) -> None:
         self.role.voteFor(player=player)
@@ -84,13 +86,11 @@ class Player():
         self.role.voteAbstain()
 
     def nightReset(self) -> None:
+        self.role.nightReset()
         self.mafiaVotes = 0
-        self.protected = False
-        self.previousVote = ""
         self.lynchVotes = 0
         self.mafiaVoted = False
         self.doctorVote = False
-        self.selfProtection = False
 
     def mafiaVote(self) -> None:
         self.mafiaVotes += 1
@@ -99,10 +99,10 @@ class Player():
         self.mafiaVotes = 0
 
     def getPreviousVote(self) -> str:
-        return self.previousVote
+        return self.role.previousVote
     
     def resetPreviousVote(self) -> str:
-        self.previousVote = ""
+        self.role.previousVote = ""
 
     def passwordCheck(self) -> bool:
         passwordCheck: bool = True
@@ -130,21 +130,24 @@ class Player():
             print("You are not an Investigator.")
 
     def addProtection(self) -> None:
-        self.protected = True
+        self.role.protected = True
+
+    def getProtection(self) -> bool:
+        return self.role.protected
 
     def resetProtection(self) -> None:
-        self.protected = False
-    
+        self.role.protected = False
+
     def kill(self) -> None:
-        if self.selfProtection:
-            return
-        else:
-            self.dead = True
+        isDead = self.role.kill()
+        if isDead:
             Player.playerCount -= 1
             Player.alivePlayers -= 1
             Player.alivePlayerList.remove(self)
             Player.alivePlayerNames.remove(self.name)
+        else:
             return
+        return
     
     def isDead(self) -> bool:
         return self.dead

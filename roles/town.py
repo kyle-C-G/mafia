@@ -5,6 +5,8 @@ import time
 class Town(Role):
     def __init__(self) -> None:
         super().__init__(roleName="Town")
+        self.protection = False
+        self.previousVote = ""
 
     def killPlayer(self, player) -> None:
         print("You can't kill.")
@@ -21,7 +23,7 @@ class Town(Role):
         self.previousVote = "Against"
         return
     
-    def nightPrompt(self, playerClass) -> None:
+    def nightPrompt(self, playerclass) -> None:
         turnEnded: bool = True
         while turnEnded:
             questions = [inquirer.List("EndTurn", 
@@ -32,7 +34,19 @@ class Town(Role):
                 turnEnded = False
             else:
                 pass
-        time.sleep(5)
+        time.sleep(2)
 
-    def nightAction(self) -> None:
+    def nightAction(self, playerclass) -> None:
+        return
+
+    def kill(self) -> bool:
+        if self.protection:
+            return False
+        else:
+            self.dead = True
+            return True
+
+    def nightReset(self) -> None:
+        self.protected = False
+        self.previousVote = ""
         return
