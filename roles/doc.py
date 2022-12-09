@@ -9,7 +9,8 @@ class Doctor(Role):
         self.protection: bool = False
         self.healedPlayer = 0
         self.previousVote: str = ""
-        self.name = name
+        self.name: str= name
+        self.dead: bool = False
 
     def killPlayer(self, player) -> None:
         print("You can't kill.")
@@ -73,12 +74,11 @@ class Doctor(Role):
             return False
         else:
             self.dead = True
-            print("Did not heal")
             time.sleep(5)
             return True
     
     def nightReset(self) -> None:
         self.healedPlayer = 0
         self.selfProtection = False
-        self.protected = False
+        self.protection = False
         self.previousVote = ""

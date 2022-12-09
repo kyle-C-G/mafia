@@ -5,9 +5,10 @@ import time
 class Investigator(Role):
     def __init__(self, name: str) -> None:
         super().__init__(roleName="Investigator")
-        self.protection = False
+        self.protection: bool = False
         self.previousVote = ""
-        self.name = name
+        self.name: str = name
+        self.dead: bool = False
 
     def killPlayer(self, player) -> None:
         print("You can't kill.")
@@ -57,6 +58,6 @@ class Investigator(Role):
             return True
     
     def nightReset(self) -> None:
-        self.protected = False
+        self.protection = False
         self.previousVote = ""
         return
