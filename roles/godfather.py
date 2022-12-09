@@ -3,8 +3,12 @@ import inquirer
 import time
 
 class Godfather(Role):
-    def __init__(self) -> None:
+    def __init__(self, name: str) -> None:
         super().__init__(roleName="Godfather")
+        self.protection: bool = False
+        self.previousVote = ""
+        self.name: str = name
+        self.dead: bool = False
     
     def killPlayer(self, player) -> None:
         if player.getRoleName() == "Mafia":
@@ -17,17 +21,17 @@ class Godfather(Role):
         player.lynchVotes += 1
         return
         
-    def voteAbstain(self) -> None:
+    def voteAbstain(self, player) -> None:
         self.previousVote = "Abstain"
         return
 
-    def voteAgainst(self) -> None:
+    def voteAgainst(self, player) -> None:
         self.previousVote = "Against"
         return
 
-    def nightAction(self, playerClass) -> list[str]:
+    def nightPrompt(self, playerclass) -> list[str]:
         playerList: list[str] = []
-        for player in playerClass.alivePlayerList:
+        for player in playerclass.alivePlayerList:
             if player.getRoleName() == "Mafia":
                 pass
             else:
@@ -37,8 +41,23 @@ class Godfather(Role):
                 message="Vote for the Mafia to kill", 
                 choices=playerList)]
             answers = inquirer.prompt(questions)
-            votedPlayer = playerClass.getPlayerByName(answers["MafiaVote"])
+            votedPlayer = playerclass.getPlayerByName(answers["MafiaVote"])
             votedPlayer.mafiaVote()
         else:
             print("Error")
-        time.sleep(5)
+        time.sleep(2)
+    
+    def nightAction(self, playerclass) -> None:
+        return
+
+    def kill(self) -> bool:
+        if self.protection:
+            return False
+        else:
+            self.dead = True
+            return True
+
+    def nightReset(self) -> None:
+        self.protection = False
+        self.previousVote = ""
+        return

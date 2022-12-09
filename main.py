@@ -8,11 +8,11 @@ def main() -> None:
     gameWon: bool = False
     count: int = 1
     while gameWon == False:
-        won = day(count=count)
+        won = day(dayCount = count)
         if won:
             gameWon = True
             break
         elif won == False:
-            night(count=count)
+            night(dayCount = count)
             count += 1
 main()

@@ -3,8 +3,12 @@ import inquirer
 import time
 
 class Investigator(Role):
-    def __init__(self) -> None:
+    def __init__(self, name: str) -> None:
         super().__init__(roleName="Investigator")
+        self.protection: bool = False
+        self.previousVote = ""
+        self.name: str = name
+        self.dead: bool = False
 
     def killPlayer(self, player) -> None:
         print("You can't kill.")
@@ -13,11 +17,11 @@ class Investigator(Role):
         player.lynchVotes += 1
         return
         
-    def voteAbstain(self) -> None:
+    def voteAbstain(self, player) -> None:
         self.previousVote = "Abstain"
         return
 
-    def voteAgainst(self) -> None:
+    def voteAgainst(self, player) -> None:
         self.previousVote = "Against"
         return
 
@@ -34,11 +38,26 @@ class Investigator(Role):
             case "Town":
                 print(f"{player.getName()} is a member of the Town.")
     
-    def nightAction(self, playerClass) -> None:
+    def nightPrompt(self, playerclass) -> None:
         questions = [inquirer.List("Invest", 
-            message="Choose someone to investigate", 
-            choices=playerClass.alivePlayerNames)]
+            message = "Choose someone to investigate", 
+            choices = playerclass.alivePlayerNames)]
         answers = inquirer.prompt(questions)
-        player = playerClass.getPlayerByName(answers["Invest"])
+        player = playerclass.getPlayerByName(answers["Invest"])
         self.investigate(player=player)
-        time.sleep(5)
+        time.sleep(2)
+
+    def nightAction(self, playerclass) -> None:
+        return
+
+    def kill(self) -> bool:
+        if self.protection:
+            return False
+        else:
+            self.dead = True
+            return True
+    
+    def nightReset(self) -> None:
+        self.protection = False
+        self.previousVote = ""
+        return

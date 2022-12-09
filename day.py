@@ -49,11 +49,11 @@ def startVote(alivePlayerNames, alivePlayers) -> None:
                 choices=["For", "Against", "Abstain"])]
             answers = inquirer.prompt(questions)
             if answers["PlayerVote"] == "For":
-                player.voteFor(votedPlayer)
+                player.voteFor(player = votedPlayer)
             elif answers["PlayerVote"] == "Abstain":
-                player.voteAbstain()
+                player.voteAbstain(player = votedPlayer)
             elif answers["PlayerVote"] == "Against":
-                player.voteAgainst()
+                player.voteAgainst(player=votedPlayer)
     os.system("cls")
     if votedPlayer.getVoteCount() > ((len(alivePlayers) / 2) - 1):
         playerFor = []
@@ -66,29 +66,30 @@ def startVote(alivePlayerNames, alivePlayers) -> None:
                 playerFor.append(player.getName())
             elif player.getPreviousVote() == "Against": 
                 playerAgainst.append(player.getName())
-        time.sleep(5)
+        time.sleep(2)
         print(f"Players who voted for lynching {votedPlayer.getName()}:\n{', '.join(playerFor)}\n")
         print(f"Players who voted against lynching {votedPlayer.getName()}:\n{', '.join(playerAgainst)}\n")
         print(f"Players who abstained from voting:\n{', '.join(playerAbstain)}\n")
         votedPlayer.kill()
-        time.sleep(5)
+        time.sleep(2)
     else:
         print(f"{votedPlayer.getName()} was not lynched.")
         print("Day has ended.")
-        time.sleep(5)
+        time.sleep(2)
 
  
-def day(count) -> bool:
+def day(dayCount: int) -> bool:
     players: list[p] = p.playerList
     playerCont: int = p.playerCount
     alivePlayers: list[p] = p.alivePlayerList
     alivePlayerNames: list[str] = p.alivePlayerNames
     os.system("cls")
-    print(f"Day {count}")
-    if count == 1:
+    print(f"Day {dayCount}")
+    if dayCount == 1:
         print(f"Players: {', '.join(alivePlayerNames)}.")
-        time.sleep(5)
-    elif count > 1:
+        time.sleep(2)
+        return False
+    elif dayCount > 1:
         print(f"Players still alive:\n{', '.join(alivePlayerNames)}.")
         wonStatus = checkWon()
         if wonStatus == "Mafia Won.":
@@ -108,7 +109,7 @@ def day(count) -> bool:
                     return False
             elif answers["Vote"] == "No":
                 print("Day has ended.")
-                time.sleep(5)
+                time.sleep(2)
             gameWon: bool = checkWon()
             if gameWon == "Mafia Won.":
                 print("Mafia have won the game.")
