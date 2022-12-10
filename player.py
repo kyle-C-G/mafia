@@ -48,8 +48,7 @@ class Player():
         self.playerId = Player.playerId
         Player.playerId += 1
         self.mafiaVotes: int = 0
-        self.name: str = name
-        Player.alivePlayerNames.append(self.name) 
+        Player.alivePlayerNames.append(name) 
         self.lynchVotes: dict[str, int] = {
             "For": 0,
             "Abstain": 0,
@@ -60,15 +59,15 @@ class Player():
         self.doctorVote: bool = False
         match role:
             case "Mafia":
-                self.role: Mafia = Mafia(name = self.name)
+                self.role: Mafia = Mafia(name = name)
             case "Town":
-                self.role: Town = Town( name = self.name)
+                self.role: Town = Town( name = name)
             case "Godfather":
-                self.role: Godfather = Godfather(name = self.name)
+                self.role: Godfather = Godfather(name = name)
             case "Doctor":
-                self.role: Doctor = Doctor(name = self.name)
+                self.role: Doctor = Doctor(name = name)
             case "Investigator":
-                self.role: Investigator = Investigator(name = self.name)
+                self.role: Investigator = Investigator(name = name)
             case _:
                 print("Error")
 
@@ -132,7 +131,7 @@ class Player():
         return self.role.getRoleName()
 
     def getName(self) -> str:
-        return self.name
+        return self.role.name
 
     def investigate(self, player) -> None:
         if self.getRoleName() == "Investigator":
@@ -155,7 +154,7 @@ class Player():
             Player.playerCount -= 1
             Player.alivePlayers -= 1
             Player.alivePlayerList.remove(self)
-            Player.alivePlayerNames.remove(self.name)
+            Player.alivePlayerNames.remove(self.role.name)
         else:
             return
         return
@@ -165,9 +164,9 @@ class Player():
 
     def isDeadMessage(self) -> str:
         if self.isDead():
-            return f"{self.name} is dead"
+            return f"{self.role.name} is dead"
         else:
-            return f"{self.name} is alive"
+            return f"{self.role.name} is alive"
     
     def getVoteCount(self) -> int:
         return self.lynchVotes["For"]
