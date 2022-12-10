@@ -50,7 +50,11 @@ class Player():
         self.mafiaVotes: int = 0
         self.name: str = name
         Player.alivePlayerNames.append(self.name) 
-        self.lynchVotes: int = 0
+        self.lynchVotes: dict[str, int] = {
+            "For": 0,
+            "Abstain": 0,
+            "Against": 0
+        }
         self.password: str = password
         self.mafiaVoted: bool = False
         self.doctorVote: bool = False
@@ -93,7 +97,9 @@ class Player():
     def nightReset(self) -> None:
         self.role.nightReset()
         self.mafiaVotes = 0
-        self.lynchVotes = 0
+        self.lynchVotes["For"] = 0
+        self.lynchVotes["Against"] = 0
+        self.lynchVotes["Abstain"] = 0
         self.mafiaVoted = False
         self.doctorVote = False
 
@@ -164,13 +170,15 @@ class Player():
             return f"{self.name} is alive"
     
     def getVoteCount(self) -> int:
-        return self.lynchVotes
+        return self.lynchVotes["For"]
 
     def getMafiaVoteCount(self) -> int:
         return self.mafiaVotes
     
     def resetVoteCount(self) -> None:
-        self.lynchVotes = 0
+        self.lynchVotes["For"] = 0
+        self.lynchVotes["Against"] = 0
+        self.lynchVotes["Abstain"] = 0
     
     def killPlayer(self, player) -> None:
         self.role.killPlayer(player=player)
@@ -212,17 +220,59 @@ class TestMafia(unittest.TestCase):
     def tearDown(self) -> None:
         Player.reset()
 
+    def test_voteFor(self) -> None:
+        player: Player = self.roles["Mafia"]
+        player2: Player = self.roles["Doctor"]
+        self.assertEqual(player2.lynchVotes["For"], 0)
+        self.assertEqual(player.role.previousVote, "")
+        player.voteFor(player = player2)
+        self.assertEqual(player2.lynchVotes["For"], 1)
+        self.assertEqual(player.role.previousVote, "For")
+
+    def test_voteAbstain(self) -> None:
+        player: Player = self.roles["Mafia"]
+        player2: Player = self.roles["Doctor"]
+        self.assertEqual(player2.lynchVotes["Abstain"], 0)
+        self.assertEqual(player.role.previousVote, "")
+        player.voteAbstain(player = player2)
+        self.assertEqual(player2.lynchVotes["Abstain"], 1)
+        self.assertEqual(player.role.previousVote, "Abstain")
+
+    def test_voteAgainst(self) -> None:
+        player: Player = self.roles["Mafia"]
+        player2: Player = self.roles["Doctor"]
+        self.assertEqual(player2.lynchVotes["Against"], 0)
+        self.assertEqual(player.role.previousVote, "")
+        player.voteAgainst(player = player2)
+        self.assertEqual(player2.lynchVotes["Against"], 1)
+        self.assertEqual(player.role.previousVote, "Against")
+
+    def test_killPlayer(self) -> None:
+        player: Player = self.roles["Mafia"]
+        player2: Player = self.roles["Town"]
+        player3: Player = Player(role="Mafia", name="Mafia2", password="Mafia2")
+        # Test function works
+        self.assertEqual(player2.role.dead, False)
+        player.killPlayer(player = player2)
+        self.assertEqual(player2.role.dead, True)
+        # Test mafia can't kill mafia
+        self.assertEqual(player3.role.dead, False)
+        player.killPlayer(player = player3)
+        self.assertEqual(player3.role.dead, False)
+
     def test_killSelf(self) -> None:
         player: Player = self.roles["Mafia"]
-        self.assertEqual(player.isDead(), False)
+        self.assertEqual(player.role.dead, False)
         player.kill()
-        self.assertEqual(player.isDead(), True)
+        self.assertEqual(player.role.dead, True)
 
 
     def test_nightReset(self) -> None:
         player: Player = self.roles["Mafia"]
         self.assertEqual(player.mafiaVotes, 0)
-        self.assertEqual(player.lynchVotes, 0)
+        self.assertEqual(player.lynchVotes["For"], 0)
+        self.assertEqual(player.lynchVotes["Against"], 0)
+        self.assertEqual(player.lynchVotes["Abstain"], 0)
         self.assertEqual(player.mafiaVoted, False)
         self.assertEqual(player.doctorVote, False)
         self.assertEqual(player.role.protection, False)
@@ -230,18 +280,24 @@ class TestMafia(unittest.TestCase):
         player.role.protection = True
         player.role.previousVote = self.roles["Doctor"]
         player.mafiaVotes = 1
-        player.lynchVotes = 1
+        player.lynchVotes["For"] = 1
+        player.lynchVotes["Against"] = 1
+        player.lynchVotes["Abstain"] = 1
         player.mafiaVoted = True
         player.doctorVote = True
         self.assertEqual(player.mafiaVotes, 1)
-        self.assertEqual(player.lynchVotes, 1)
+        self.assertEqual(player.lynchVotes["For"], 1)
+        self.assertEqual(player.lynchVotes["Against"], 1)
+        self.assertEqual(player.lynchVotes["Abstain"], 1)
         self.assertEqual(player.mafiaVoted, True)
         self.assertEqual(player.doctorVote, True)
         self.assertEqual(player.role.protection, True)
         self.assertEqual(player.role.previousVote, self.roles["Doctor"])
         player.nightReset()
         self.assertEqual(player.mafiaVotes, 0)
-        self.assertEqual(player.lynchVotes, 0)
+        self.assertEqual(player.lynchVotes["For"], 0)
+        self.assertEqual(player.lynchVotes["Against"], 0)
+        self.assertEqual(player.lynchVotes["Abstain"], 0)
         self.assertEqual(player.mafiaVoted, False)
         self.assertEqual(player.doctorVote, False)
         self.assertEqual(player.role.protection, False)
@@ -261,28 +317,57 @@ class TestDoctor(unittest.TestCase):
         self.roles: dict[str, Player] = {}
         for role in Player.roles:
             self.roles[role] = createPlayer(role)
-        self.roles["Doctor2"] = Player(name="Doctor2", role="Doctor", password="Doctor2")
 
     def tearDown(self) -> None:
         Player.reset()
 
+    def test_voteFor(self) -> None:
+        player: Player = self.roles["Doctor"]
+        player2: Player = self.roles["Mafia"]
+        self.assertEqual(player2.lynchVotes["For"], 0)
+        self.assertEqual(player.role.previousVote, "")
+        player.voteFor(player = player2)
+        self.assertEqual(player2.lynchVotes["For"], 1)
+        self.assertEqual(player.role.previousVote, "For")
+
+    def test_voteAbstain(self) -> None:
+        player: Player = self.roles["Doctor"]
+        player2: Player = self.roles["Mafia"]
+        self.assertEqual(player2.lynchVotes["Abstain"], 0)
+        self.assertEqual(player.role.previousVote, "")
+        player.voteAbstain(player = player2)
+        self.assertEqual(player2.lynchVotes["Abstain"], 1)
+        self.assertEqual(player.role.previousVote, "Abstain")
+
+    def test_voteAgainst(self) -> None:
+        player: Player = self.roles["Doctor"]
+        player2: Player = self.roles["Mafia"]
+        self.assertEqual(player2.lynchVotes["Against"], 0)
+        self.assertEqual(player.role.previousVote, "")
+        player.voteAgainst(player = player2)
+        self.assertEqual(player2.lynchVotes["Against"], 1)
+        self.assertEqual(player.role.previousVote, "Against")
+
     def test_killSelf(self) -> None:
         player: Player = self.roles["Doctor"]
-        self.assertEqual(player.isDead(), False)
+        player2: Player = Player(name="Doctor2", role="Doctor", password="Doctor2")
+        # Test kill works
+        self.assertEqual(player.role.dead, False)
         player.kill()
-        self.assertEqual(player.isDead(), True)
-
-        player2: Player = self.roles["Doctor2"]
-        self.assertEqual(player2.isDead(), False)
+        self.assertEqual(player.role.dead, True)
+        # Test self protection saves
+        self.assertEqual(player2.role.dead, False)
         player2.role.selfProtection = True
         player2.kill()
-        self.assertEqual(player2.isDead(), False)
+        self.assertEqual(player2.role.dead, False)
 
     def test_nightReset(self) -> None:
         player: Player = self.roles["Doctor"]
         player2: Player = self.roles["Mafia"]
         self.assertEqual(player.mafiaVotes, 0)
-        self.assertEqual(player.lynchVotes, 0)
+        self.assertEqual(player.lynchVotes["For"], 0)
+        self.assertEqual(player.lynchVotes["Against"], 0)
+        self.assertEqual(player.lynchVotes["Abstain"], 0)
         self.assertEqual(player.mafiaVoted, False)
         self.assertEqual(player.doctorVote, False)
         self.assertEqual(player.role.selfProtection, False)
@@ -292,11 +377,15 @@ class TestDoctor(unittest.TestCase):
         player.role.protection = True
         player.role.previousVote = player2
         player.mafiaVotes = 1
-        player.lynchVotes = 1
+        player.lynchVotes["For"] = 1
+        player.lynchVotes["Against"] = 1
+        player.lynchVotes["Abstain"] = 1
         player.mafiaVoted = True
         player.doctorVote = True
         self.assertEqual(player.mafiaVotes, 1)
-        self.assertEqual(player.lynchVotes, 1)
+        self.assertEqual(player.lynchVotes["For"], 1)
+        self.assertEqual(player.lynchVotes["Against"], 1)
+        self.assertEqual(player.lynchVotes["Abstain"], 1)
         self.assertEqual(player.mafiaVoted, True)
         self.assertEqual(player.doctorVote, True)
         self.assertEqual(player.role.selfProtection, True)
@@ -304,7 +393,9 @@ class TestDoctor(unittest.TestCase):
         self.assertEqual(player.role.previousVote, player2)
         player.nightReset()
         self.assertEqual(player.mafiaVotes, 0)
-        self.assertEqual(player.lynchVotes, 0)
+        self.assertEqual(player.lynchVotes["For"], 0)
+        self.assertEqual(player.lynchVotes["Against"], 0)
+        self.assertEqual(player.lynchVotes["Abstain"], 0)
         self.assertEqual(player.mafiaVoted, False)
         self.assertEqual(player.doctorVote, False)
         self.assertEqual(player.doctorVote, False)
@@ -331,36 +422,71 @@ class TestInvestigator(unittest.TestCase):
     def tearDown(self) -> None:
         Player.reset()
 
+    def test_voteFor(self) -> None:
+        player: Player = self.roles["Investigator"]
+        player2: Player = self.roles["Doctor"]
+        self.assertEqual(player2.lynchVotes["For"], 0)
+        self.assertEqual(player.role.previousVote, "")
+        player.voteFor(player = player2)
+        self.assertEqual(player2.lynchVotes["For"], 1)
+        self.assertEqual(player.role.previousVote, "For")
+
+    def test_voteAbstain(self) -> None:
+        player: Player = self.roles["Investigator"]
+        player2: Player = self.roles["Doctor"]
+        self.assertEqual(player2.lynchVotes["Abstain"], 0)
+        self.assertEqual(player.role.previousVote, "")
+        player.voteAbstain(player = player2)
+        self.assertEqual(player2.lynchVotes["Abstain"], 1)
+        self.assertEqual(player.role.previousVote, "Abstain")
+
+    def test_voteAgainst(self) -> None:
+        player: Player = self.roles["Investigator"]
+        player2: Player = self.roles["Doctor"]
+        self.assertEqual(player2.lynchVotes["Against"], 0)
+        self.assertEqual(player.role.previousVote, "")
+        player.voteAgainst(player = player2)
+        self.assertEqual(player2.lynchVotes["Against"], 1)
+        self.assertEqual(player.role.previousVote, "Against")
+
     def test_killSelf(self) -> None:
         player: Player = self.roles["Investigator"]
-        self.assertEqual(player.isDead(), False)
+        self.assertEqual(player.role.dead, False)
         player.kill()
-        self.assertEqual(player.isDead(), True)
+        self.assertEqual(player.role.dead, True)
 
     def test_nightReset(self) -> None:
         player: Player = self.roles["Investigator"]
         player2: Player = self.roles["Doctor"]
         self.assertEqual(player.mafiaVotes, 0)
-        self.assertEqual(player.lynchVotes, 0)
+        self.assertEqual(player.lynchVotes["For"], 0)
+        self.assertEqual(player.lynchVotes["Against"], 0)
+        self.assertEqual(player.lynchVotes["Abstain"], 0)
         self.assertEqual(player.mafiaVoted, False)
         self.assertEqual(player.doctorVote, False)
         self.assertEqual(player.role.protection, False)
         self.assertEqual(player.role.previousVote, "")
         player.mafiaVotes = 1
-        player.lynchVotes = 1
+        player.lynchVotes["For"] = 1
+        player.lynchVotes["Against"] = 1
+        player.lynchVotes["Abstain"] = 1
         player.mafiaVoted = True
         player.doctorVote = True        
         player.role.protection = True
         player.role.previousVote = player2
         self.assertEqual(player.mafiaVotes, 1)
-        self.assertEqual(player.lynchVotes, 1)
+        self.assertEqual(player.lynchVotes["For"], 1)
+        self.assertEqual(player.lynchVotes["Against"], 1)
+        self.assertEqual(player.lynchVotes["Abstain"], 1)
         self.assertEqual(player.mafiaVoted, True)
         self.assertEqual(player.doctorVote, True)
         self.assertEqual(player.role.protection, True)
         self.assertEqual(player.role.previousVote, player2)
         player.nightReset()
         self.assertEqual(player.mafiaVotes, 0)
-        self.assertEqual(player.lynchVotes, 0)
+        self.assertEqual(player.lynchVotes["For"], 0)
+        self.assertEqual(player.lynchVotes["Against"], 0)
+        self.assertEqual(player.lynchVotes["Abstain"], 0)
         self.assertEqual(player.mafiaVoted, False)
         self.assertEqual(player.doctorVote, False)
         self.assertEqual(player.role.protection, False)
@@ -384,36 +510,71 @@ class TestTown(unittest.TestCase):
     def tearDown(self) -> None:
         Player.reset()
 
+    def test_voteFor(self) -> None:
+        player: Player = self.roles["Town"]
+        player2: Player = self.roles["Doctor"]
+        self.assertEqual(player2.lynchVotes["For"], 0)
+        self.assertEqual(player.role.previousVote, "")
+        player.voteFor(player = player2)
+        self.assertEqual(player2.lynchVotes["For"], 1)
+        self.assertEqual(player.role.previousVote, "For")
+
+    def test_voteAbstain(self) -> None:
+        player: Player = self.roles["Town"]
+        player2: Player = self.roles["Doctor"]
+        self.assertEqual(player2.lynchVotes["Abstain"], 0)
+        self.assertEqual(player.role.previousVote, "")
+        player.voteAbstain(player = player2)
+        self.assertEqual(player2.lynchVotes["Abstain"], 1)
+        self.assertEqual(player.role.previousVote, "Abstain")
+
+    def test_voteAgainst(self) -> None:
+        player: Player = self.roles["Town"]
+        player2: Player = self.roles["Doctor"]
+        self.assertEqual(player2.lynchVotes["Against"], 0)
+        self.assertEqual(player.role.previousVote, "")
+        player.voteAgainst(player = player2)
+        self.assertEqual(player2.lynchVotes["Against"], 1)
+        self.assertEqual(player.role.previousVote, "Against")
+
     def test_killSelf(self) -> None:
         player: Player = self.roles["Town"]
-        self.assertEqual(player.isDead(), False)
+        self.assertEqual(player.role.dead, False)
         player.kill()
-        self.assertEqual(player.isDead(), True)
+        self.assertEqual(player.role.dead, True)
 
     def test_nightReset(self) -> None:
         player: Player = self.roles["Town"]
         player2: Player = self.roles["Doctor"]
         self.assertEqual(player.mafiaVotes, 0)
-        self.assertEqual(player.lynchVotes, 0)
+        self.assertEqual(player.lynchVotes["For"], 0)
+        self.assertEqual(player.lynchVotes["Against"], 0)
+        self.assertEqual(player.lynchVotes["Abstain"], 0)
         self.assertEqual(player.mafiaVoted, False)
         self.assertEqual(player.doctorVote, False)
         self.assertEqual(player.role.protection, False)
         self.assertEqual(player.role.previousVote, "")
         player.mafiaVotes = 1
-        player.lynchVotes = 1
+        player.lynchVotes["For"] = 1
+        player.lynchVotes["Against"] = 1
+        player.lynchVotes["Abstain"] = 1
         player.mafiaVoted = True
         player.doctorVote = True
         player.role.protection = True
         player.role.previousVote = player2
         self.assertEqual(player.mafiaVotes, 1)
-        self.assertEqual(player.lynchVotes, 1)
+        self.assertEqual(player.lynchVotes["For"], 1)
+        self.assertEqual(player.lynchVotes["Against"], 1)
+        self.assertEqual(player.lynchVotes["Abstain"], 1)
         self.assertEqual(player.mafiaVoted, True)
         self.assertEqual(player.doctorVote, True)
         self.assertEqual(player.role.protection, True)
         self.assertEqual(player.role.previousVote, player2)
         player.nightReset()
         self.assertEqual(player.mafiaVotes, 0)
-        self.assertEqual(player.lynchVotes, 0)
+        self.assertEqual(player.lynchVotes["For"], 0)
+        self.assertEqual(player.lynchVotes["Against"], 0)
+        self.assertEqual(player.lynchVotes["Abstain"], 0)
         self.assertEqual(player.mafiaVoted, False)
         self.assertEqual(player.doctorVote, False)
         self.assertEqual(player.role.protection, False)
@@ -437,36 +598,71 @@ class TestGodfather(unittest.TestCase):
     def tearDown(self) -> None:
         Player.reset()
 
+    def test_voteFor(self) -> None:
+        player: Player = self.roles["Godfather"]
+        player2: Player = self.roles["Doctor"]
+        self.assertEqual(player2.lynchVotes["For"], 0)
+        self.assertEqual(player.role.previousVote, "")
+        player.voteFor(player = player2)
+        self.assertEqual(player2.lynchVotes["For"], 1)
+        self.assertEqual(player.role.previousVote, "For")
+
+    def test_voteAbstain(self) -> None:
+        player: Player = self.roles["Godfather"]
+        player2: Player = self.roles["Doctor"]
+        self.assertEqual(player2.lynchVotes["Abstain"], 0)
+        self.assertEqual(player.role.previousVote, "")
+        player.voteAbstain(player = player2)
+        self.assertEqual(player2.lynchVotes["Abstain"], 1)
+        self.assertEqual(player.role.previousVote, "Abstain")
+
+    def test_voteAgainst(self) -> None:
+        player: Player = self.roles["Godfather"]
+        player2: Player = self.roles["Doctor"]
+        self.assertEqual(player2.lynchVotes["Against"], 0)
+        self.assertEqual(player.role.previousVote, "")
+        player.voteAgainst(player = player2)
+        self.assertEqual(player2.lynchVotes["Against"], 1)
+        self.assertEqual(player.role.previousVote, "Against")
+
     def test_killSelf(self) -> None:
         player: Player = self.roles["Godfather"]
-        self.assertEqual(player.isDead(), False)
+        self.assertEqual(player.role.dead, False)
         player.kill()
-        self.assertEqual(player.isDead(), True)
+        self.assertEqual(player.role.dead, True)
 
     def test_nightReset(self) -> None:
         player: Player = self.roles["Godfather"]
         player2: Player = self.roles["Doctor"]
         self.assertEqual(player.mafiaVotes, 0)
-        self.assertEqual(player.lynchVotes, 0)
+        self.assertEqual(player.lynchVotes["For"], 0)
+        self.assertEqual(player.lynchVotes["Against"], 0)
+        self.assertEqual(player.lynchVotes["Abstain"], 0)
         self.assertEqual(player.mafiaVoted, False)
         self.assertEqual(player.doctorVote, False)
         self.assertEqual(player.role.protection, False)
         self.assertEqual(player.role.previousVote, "")
         player.mafiaVotes = 1
-        player.lynchVotes = 1
+        player.lynchVotes["For"] = 1
+        player.lynchVotes["Against"] = 1
+        player.lynchVotes["Abstain"] = 1
         player.mafiaVoted = True
         player.doctorVote = True
         player.role.protection = True
         player.role.previousVote = player2
         self.assertEqual(player.mafiaVotes, 1)
-        self.assertEqual(player.lynchVotes, 1)
+        self.assertEqual(player.lynchVotes["For"], 1)
+        self.assertEqual(player.lynchVotes["Against"], 1)
+        self.assertEqual(player.lynchVotes["Abstain"], 1)
         self.assertEqual(player.mafiaVoted, True)
         self.assertEqual(player.doctorVote, True)
         self.assertEqual(player.role.protection, True)
         self.assertEqual(player.role.previousVote, player2)
         player.nightReset()
         self.assertEqual(player.mafiaVotes, 0)
-        self.assertEqual(player.lynchVotes, 0)
+        self.assertEqual(player.lynchVotes["For"], 0)
+        self.assertEqual(player.lynchVotes["Against"], 0)
+        self.assertEqual(player.lynchVotes["Abstain"], 0)
         self.assertEqual(player.mafiaVoted, False)
         self.assertEqual(player.doctorVote, False)
         self.assertEqual(player.role.protection, False)

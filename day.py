@@ -55,7 +55,7 @@ def startVote(alivePlayerNames, alivePlayers) -> None:
             elif answers["PlayerVote"] == "Against":
                 player.voteAgainst(player=votedPlayer)
     os.system("cls")
-    if votedPlayer.getVoteCount() > ((len(alivePlayers) / 2) - 1):
+    if votedPlayer.lynchVotes["For"] > votedPlayer.lynchVotes["Against"]:
         playerFor = []
         playerAgainst = []
         playerAbstain = []

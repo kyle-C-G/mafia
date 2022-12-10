@@ -14,14 +14,17 @@ class Investigator(Role):
         print("You can't kill.")
 
     def voteFor(self, player) -> None:
-        player.lynchVotes += 1
+        player.lynchVotes["For"] += 1
+        self.previousVote = "For"
         return
-        
+
     def voteAbstain(self, player) -> None:
+        player.lynchVotes["Abstain"] += 1
         self.previousVote = "Abstain"
         return
 
     def voteAgainst(self, player) -> None:
+        player.lynchVotes["Against"] += 1
         self.previousVote = "Against"
         return
 
