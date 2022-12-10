@@ -17,16 +17,17 @@ class Doctor(Role):
         return
 
     def voteFor(self, player) -> None:
-        player.lynchVotes += 1
+        player.lynchVotes["For"] += 1
         self.previousVote = "For"
         return
 
     def voteAbstain(self, player) -> None:
+        player.lynchVotes["Abstain"] += 1
         self.previousVote = "Abstain"
         return
 
     def voteAgainst(self, player) -> None:
-        player.lynchVotes -= 1
+        player.lynchVotes["Against"] += 1
         self.previousVote = "Against"
         return
 
@@ -74,7 +75,6 @@ class Doctor(Role):
             return False
         else:
             self.dead = True
-            time.sleep(5)
             return True
     
     def nightReset(self) -> None:

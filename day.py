@@ -4,6 +4,14 @@ from player import Player as p
 import inquirer
 import time
 
+abstains: int = 0
+votesFor: int = 0
+votesAgainst: int = 0
+player: p
+playerFor: list[p] = []
+playerAgainst: list[p] = []
+playerAbstain: list[p] = []
+
 def checkWon() -> str:
     mafia: int = 0
     town: int = 0
@@ -26,18 +34,17 @@ def checkWon() -> str:
     else:
         return "Game is not over."
 
-def startVote(alivePlayerNames, alivePlayers) -> None:
+def voteUp(alivePlayerNames, alivePlayers) -> p:
     os.system("cls")
     questions = [inquirer.List("VoteFor", 
         message="Select a person to stand trial", 
         choices=alivePlayerNames)]
     answers = inquirer.prompt(questions)
     votedPlayer: p = p.getPlayerByName(answers["VoteFor"])
-    abstains: int = 0
-    votesFor: int = 0
-    votesAgainst: int = 0
-    player: p
-    for player in alivePlayers:
+    return votedPlayer
+
+def voting(votedPlayer: p):
+    for player in p.alivePlayerList:
         os.system("cls")
         if player == votedPlayer:
             pass
@@ -50,28 +57,22 @@ def startVote(alivePlayerNames, alivePlayers) -> None:
             answers = inquirer.prompt(questions)
             if answers["PlayerVote"] == "For":
                 player.voteFor(player = votedPlayer)
+                playerFor.append(player.getName())
             elif answers["PlayerVote"] == "Abstain":
                 player.voteAbstain(player = votedPlayer)
+                playerAbstain.append(player.getName())
             elif answers["PlayerVote"] == "Against":
                 player.voteAgainst(player=votedPlayer)
-    os.system("cls")
-    if votedPlayer.getVoteCount() > ((len(alivePlayers) / 2) - 1):
-        playerFor = []
-        playerAgainst = []
-        playerAbstain = []
-        for player in alivePlayers:
-            if player.getPreviousVote() == "Abstain":
-                playerAbstain.append(player.getName())
-            elif player.getPreviousVote() == "For":
-                playerFor.append(player.getName())
-            elif player.getPreviousVote() == "Against": 
                 playerAgainst.append(player.getName())
+    os.system("cls")
+    if votedPlayer.lynchVotes["For"] > votedPlayer.lynchVotes["Against"]:
         time.sleep(2)
+        input("Press enter to show results.")
         print(f"Players who voted for lynching {votedPlayer.getName()}:\n{', '.join(playerFor)}\n")
         print(f"Players who voted against lynching {votedPlayer.getName()}:\n{', '.join(playerAgainst)}\n")
         print(f"Players who abstained from voting:\n{', '.join(playerAbstain)}\n")
         votedPlayer.kill()
-        time.sleep(2)
+        time.sleep(10)
     else:
         print(f"{votedPlayer.getName()} was not lynched.")
         print("Day has ended.")
@@ -105,7 +106,8 @@ def day(dayCount: int) -> bool:
                 choices=["Yes", "No"])]
             answers = inquirer.prompt(questions)
             if answers["Vote"] == "Yes":
-                    startVote(alivePlayerNames=alivePlayerNames, alivePlayers=alivePlayers)
+                    votedPlayer: p = voteUp(alivePlayerNames=alivePlayerNames, alivePlayers=alivePlayers)
+                    voting(votedPlayer = votedPlayer)
                     return False
             elif answers["Vote"] == "No":
                 print("Day has ended.")
