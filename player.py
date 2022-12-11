@@ -4,6 +4,7 @@ from roles.doc import Doctor
 from roles.invest import Investigator
 from roles.godfather import Godfather
 import unittest
+import inquirer
 
 class Player():
 
@@ -114,6 +115,20 @@ class Player():
     def resetPreviousVote(self) -> str:
         self.role.previousVote = ""
 
+    def passwordReset(self) -> None:
+        passwordResetVerification: bool = True
+        while passwordResetVerification:
+            password: str = input("Enter a new password:\n")
+            questions = [ 
+                inquirer.List("passwordReset", 
+                    message=f"Your new password is {password}. Is this correct?", 
+                    choices=["Yes", "No"])]
+            answers = inquirer.prompt(questions)
+            if answers["passwordReset"] == "Yes":
+                self.password = password
+                passwordResetVerification = False
+                return
+    
     def passwordCheck(self) -> bool:
         passwordCheck: bool = True
         while passwordCheck:
@@ -122,7 +137,7 @@ class Player():
                 passwordCheck = False
                 return True
             elif userInput == "@M3Nexttimemaa":
-                passwordCheck = False
+                self.passwordReset()
                 return True
             else:
                 print("Incorrect password.\n")

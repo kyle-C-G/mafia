@@ -100,6 +100,12 @@ def day(dayCount: int) -> bool:
             print("Town has won the game.")
             return True
         else:
+            modPasswordVerification: bool = True
+            while modPasswordVerification:
+                password: str = input("Enter moderator password:\n")
+                if password == "@M3Nexttimemaa":
+                    modPasswordVerification = False
+                    break
             questions = [ 
             inquirer.List("Vote", 
                 message="Start a vote>", 

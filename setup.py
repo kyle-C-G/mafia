@@ -27,8 +27,14 @@ def addPlayer(count) -> None:
     while passwordVerification:
         password: str = input("Enter a password:\n")
         if len(password) > 1:
-            passwordVerification = False
-            break
+            passwordCheck = [ 
+                inquirer.List("yesOrNo", 
+                message=f"Your password is {password}. Is this correct?", 
+                choices=["Yes", "No"])]
+            checkPasswordCorrect = inquirer.prompt(passwordCheck)
+            if checkPasswordCorrect["yesOrNo"] == "Yes":
+                passwordVerification = False
+                break
         else:
             print("Password needs to be longer.\n")
     answers = inquirer.prompt(questions)
